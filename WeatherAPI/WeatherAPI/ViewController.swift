@@ -9,81 +9,34 @@ import UIKit
 import Alamofire
 
 
-class ViewController: UIViewController {
 
+class ViewController: UIViewController {
+    var time: BaseTime = .five
+    
+    var date: String = {
+        let date = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "YYYYMMdd"
+        
+        return formatter.string(from: date)
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Do any additional setup after loading the view.
-        let url = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst"
-        
-        let serviceKey = "gg0tDMzz84/nTyjdkyZdTQRu2QiQ/3PVTT/4/+T6QYCak7+fbxl2PhXiCneZf8yRBUMDtabOJNsOzV6nXCP1iA=="
-        
-        let param: Parameters = [
-            "serviceKey" : serviceKey,
-            "dataType" : "JSON",
-            "numOfRows" : 10,
-            "pageNo" : 1,
-            "base_date" : "20220206",
-            "base_time" : "1700",
-            "nx" : 60,
-            "ny" : 127
-        ]
-        
-        struct DecodableType: Decodable {
-            var response: Response?
-            
-            struct Response: Decodable {
-                var header: Header
-                var body: Body?
-                struct Header: Decodable {
-                    var resultCode: String
-                    var resultMsg: String
-                }
-                
-                struct Body: Decodable {
-                    var items: Items
-                    var numOfRows: Int
-                    var pageNo: Int
-                    var totalCount: Int
-                    var dataType: String
-                    
-                    struct Items: Decodable {
-                        var item: [Item]
-                        
-                        struct Item: Decodable {
-                            var baseDate: String
-                            var baseTime: String
-                            var nx: Int
-                            var ny: Int
-                            var category: String
-                            var fcstDate: String
-                            var fcstTime: String
-                            var fcstValue: String
-                        }
-                    }
-                }
-            }
-        }
-        
-        let call = AF.request(url, method: .get, parameters: param, encoding: URLEncoding.default)
-        
-//        call.responseJSON(){ res in
-//            print(res.value)
-//        }
-        
-        call.responseDecodable(of: DecodableType.self){ response in
-            switch response.result {
-            case .success(let value):
-                if let items = value.response?.body?.items {
-                    print(items)
-                }
-            case .failure(let error):
-                print("ERROR : \(error.localizedDescription)")
-            }
-        }
+        let weather = WeatherModule()
+        weather.callAPI(date: self.date, baseTime: self.time.rawValue)
     }
-
-
+    
+    enum BaseTime: String{
+        case two = "0200"
+        case five = "0500"
+        case eight = "0800"
+        case eleven = "1100"
+        case fourteen = "1400"
+        case seventeen = "1700"
+        case twenty = "2000"
+        case twentyThree = "2300"
+    }
 }
+
 
